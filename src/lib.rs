@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use rand::Rng;
 
 pub struct GameOfLife {
     pub living_cells: HashSet<(i32, i32)>,
@@ -15,7 +16,7 @@ impl GameOfLife {
         self.living_cells.insert((x, y));
     }
 
-    fn is_alive(&self, x: i32, y: i32) -> bool {
+    pub fn is_alive(&self, x: i32, y: i32) -> bool {
         self.living_cells.contains(&(x, y))
     }
 
@@ -36,7 +37,7 @@ impl GameOfLife {
         self.living_cells = next_state;
     }
 
-    fn candidate_cells(&self) -> HashSet<(i32, i32)> {
+    pub fn candidate_cells(&self) -> HashSet<(i32, i32)> {
         // Returns the list of cells which might change state (e.g., neighbors of all living cells, union living cells)
         let mut candidates = HashSet::new();
 
@@ -148,4 +149,65 @@ impl SequenceValidator {
         SequenceStatus { is_valid: valid, exceptions: total_exceptions }
     }
 
+}
+
+pub struct SequenceGenerator {
+    pub traveler_probability: f64,
+    pub density: f64,
+    pub initial_extent: usize
+}
+
+impl SequenceGenerator {
+    pub fn new() -> Self {
+        Self {
+            traveler_probability: 0.01,
+            density: 0.3,
+            initial_extent: 2
+        }
+    }
+
+    pub fn generate_sequence(&self, seq_length: usize) -> Vec<HashSet<(i32, i32)>> {
+        let mut sequence: Vec<HashSet<(i32, i32)>> = Vec::new();
+        let mut rng = rand::thread_rng();
+        let initial_state = self.generate_initial_state();
+        sequence.push(initial_state.clone());
+
+        let mut game = GameOfLife { living_cells: initial_state };
+
+        for _ in 0..(seq_length - 1) {
+            // Advance the state
+            game.update();
+
+            // Iterate over all dead neighbors, and try to generate a traveler
+            let neighbors = game.candidate_cells();
+            for &(x, y) in neighbors.iter() {
+                if !game.is_alive(x, y) {
+                    let p: f64 = rng.gen();
+                    if p < self.traveler_probability {
+                        println!("generated traveler!");
+                        game.add_cell(x, y);
+                    }
+                }
+            }
+
+            sequence.push(game.living_cells.clone());
+        }        
+        sequence
+    }
+
+    fn generate_initial_state(&self) -> HashSet<(i32, i32)> {
+        let mut cells: HashSet<(i32, i32)> = HashSet::new();
+        let mut rng = rand::thread_rng();
+
+        for x in -(self.initial_extent as i32)..=(self.initial_extent as i32) {
+            for y in -(self.initial_extent as i32)..=(self.initial_extent as i32) {
+                let p: f64 = rng.gen();
+                if p < self.density {
+                    cells.insert((x, y));
+                }
+            }
+        }
+
+        cells
+    }
 }
