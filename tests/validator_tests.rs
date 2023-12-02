@@ -28,3 +28,24 @@ fn test_invalid_blinker_sequence_with_exception() {
     assert!(!status.is_valid);
     assert_eq!(status.exceptions, 1);
 }
+
+#[test]
+fn test_alleged_instance() {
+    let validator = SequenceValidator::new(5, 1);
+    let mut sequence: Vec<HashSet<(i32, i32)>> = Vec::new();
+
+    sequence.push([(-2, -1), (2, 2), (0, -1), (0, -2), (0, 0), (2, 1), (0, 2), (-1, 1)].iter().cloned().collect());
+    sequence.push([(0, 1), (1, 2), (1, 0), (-1, -2), (0, 0), (0, -1), (-1, 1), (1, -1)].iter().cloned().collect());
+    sequence.push([(-1, 1), (-1, -1), (0, -2), (1, -1), (0, 2)].iter().cloned().collect());
+    sequence.push([(0, -2), (0, 0), (0, -1)].iter().cloned().collect());
+    sequence.push([(-1, -1), (1, -1), (0, -1)].iter().cloned().collect());
+    sequence.push([(0, 0), (0, -2), (0, -1) ].iter().cloned().collect());
+    sequence.push([(0, -1), (-1, -1), (1, -1)].iter().cloned().collect());
+    sequence.push([(0, 0), (0, -1), (0, -2)].iter().cloned().collect());
+    sequence.push([(0, 0), (0, -1), (-1, -1), (1, -1)].iter().cloned().collect());
+    sequence.push([(-1, -1), (0, -1), (1, -1), (0, -2), (1, 0), (-1, 0), (0, 0)].iter().cloned().collect());
+
+    let status = validator.validate(sequence);
+    assert!(status.is_valid);
+    assert_eq!(status.exceptions, 1);
+}

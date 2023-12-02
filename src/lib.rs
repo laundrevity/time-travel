@@ -133,7 +133,6 @@ impl SequenceValidator {
 
             // Identify new exceptions which occur in next step
             for &cell in expected_next_state.difference(&game.living_cells) {
-                println!("found an exception");
                 active_exceptions.insert((cell, step + 1));
                 total_exceptions += 1;
             }
@@ -142,7 +141,6 @@ impl SequenceValidator {
         }
 
         if active_exceptions.len() > 0 {
-            println!("SETTING valid=false BECAUSE THERE ARE ACTIVE EXCEPTIONS");
             valid = false;
         }
 
@@ -184,7 +182,6 @@ impl SequenceGenerator {
                 if !game.is_alive(x, y) {
                     let p: f64 = rng.gen();
                     if p < self.traveler_probability {
-                        println!("generated traveler!");
                         game.add_cell(x, y);
                     }
                 }
